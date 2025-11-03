@@ -33,11 +33,20 @@ jobs:
             echo "No build script defined. Skipping build."
           fi
 
-      - name: Create deploy zip (include node_modules)
+      - name: Create deploy zip (use build/dist if available)
         run: |
-          # create a zip including node_modules and build outputs, but exclude git and workflow files
           apt-get update && apt-get install -y zip >/dev/null
-          zip -r deploy.zip . -x ".git/*" ".github/*" "*.log"
+          # prefer common build folders
+          if [ -d "./dist" ]; then
+            echo "Using dist/ for deployment"
+            zip -r deploy.zip dist -x "dist/.git*"
+          elif [ -d "./build" ]; then
+            echo "Using build/ for deployment"
+            zip -r deploy.zip build -x "build/.git*"
+          else
+            echo "No build/ or dist/ found — including node_modules in deploy.zip"
+            zip -r deploy.zip . -x ".git/*" ".github/*" "*.log"
+          fi
           ls -lh deploy.zip
 
       - name: Deploy to Azure Web App
