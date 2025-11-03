@@ -1,0 +1,15 @@
+{
+  "name": "static-web-app",
+  "version": "1.0.0",
+  "description": "Simple Node.js welcome app",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
