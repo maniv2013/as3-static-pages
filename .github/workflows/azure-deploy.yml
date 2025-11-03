@@ -12,24 +12,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js 14
+      - name: Setup Node.js (recommended Node 22 for npm11 compatibility)
         uses: actions/setup-node@v4
         with:
-          node-version: '14'
+          node-version: '22'
+
+      - name: Install npm@11.6.2
+        run: |
+          npm install -g npm@11.6.2
+          npm --version
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run build (if defined)
         run: |
-          if grep -q "\"build\"" package.json; then
+          if grep -q '"build"' package.json; then
             npm run build
           else
             echo "No build script defined. Skipping build."
           fi
 
-      - name: Archive artifacts (exclude node_modules)
-        run: zip -r deploy.zip . -x "node_modules/*" ".git/*"
+      - name: Create deploy zip (include node_modules)
+        run: |
+          # create a zip including node_modules and build outputs, but exclude git and workflow files
+          apt-get update && apt-get install -y zip >/dev/null
+          zip -r deploy.zip . -x ".git/*" ".github/*" "*.log"
+          ls -lh deploy.zip
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
